@@ -414,6 +414,7 @@ canvas.badge{vertical-align:middle}#lkstats .rk{display:flex;align-items:center;
       <button class="btn ghost" id="restartbtn">Restart match</button>
       <button class="btn ghost" data-go="setup">Change setup</button>
       <button class="btn ghost" data-go="title">Main menu</button>
+      <button class="btn ghost hide" id="pauselog">Copy online log</button>
     </div>
   </div>
 </div>
@@ -1695,14 +1696,81 @@ function netRecv(raw){
 function netFlushFx(){if(Net.fq.length){netSend({t:'fx',l:Net.fq});Net.fq=[];}}
 function netSendTurn(){netFlushFx();netSend({t:'turn',snap:netSnap(),hash:netHash()});}
 function netGo(u){netSend({t:'go',snap:netSnap()});Net.fireOrig(u);}
+/* connection log, heartbeat, dropouts and rejoining */
+const NLOG=[];
+function nlog(t){NLOG.push(new Date().toTimeString().slice(0,8)+' '+t);if(NLOG.length>250)NLOG.shift();}
+function netLogText(){return['Crater Kings online log','Game version '+NETVER,'Role '+(Net.host?'host':'guest')+', room '+(Net.code||'none'),navigator.userAgent,'',...NLOG].join('\n');}
+function netCopyLog(){const t=netLogText();const done=()=>toast('Online log copied','#9fe8ff');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,()=>netShowLog(t));else netShowLog(t);}
+function netShowLog(t){$('#pktitle').textContent='Online log';$('#pkbody').innerHTML='<textarea readonly style="width:100%;height:50vh;font:12px monospace">'+t.replace(/</g,'&lt;')+'</textarea>';$('#pkdone').onclick=()=>$('#picker').classList.add('hide');$('#picker').classList.remove('hide');}
+function netInMatch(){return Game.on&&!Game.demo&&Game.state!=='over';}
+let netWake=null;
+async function netWakeLock(on){try{if(on&&!netWake&&navigator.wakeLock&&document.visibilityState==='visible'){netWake=await navigator.wakeLock.request('screen');netWake.addEventListener('release',()=>{netWake=null;});}else if(!on&&netWake){await netWake.release();netWake=null;}}catch(e){}}
+function netTick(){
+  const now=performance.now();
+  if(Net.conn&&Net.conn.open){
+    if(now-Net.lastHb>2000){Net.lastHb=now;netSend({t:'hb'});}
+    const limit=Net.remoteAway?120000:25000;
+    if(Net.lastRx&&now-Net.lastRx>limit){nlog('no answer for '+Math.round((now-Net.lastRx)/1000)+'s');netDrop('timed out');}
+  }
+  if(Net.host&&Net.dropT&&now-Net.dropT>45000){Net.dropT=0;netGuestGone(Net.dropName||'Player 2');}
+  if(!Net.host&&Net.reconn)netReconnect();
+  if(document.hidden)try{netPump();}catch(e){}
+}
+setInterval(netTick,1000);
+document.addEventListener('visibilitychange',()=>{
+  if(!Net.on)return;const away=document.visibilityState==='hidden';nlog(away?'switched away from the game':'came back to the game');
+  netSend({t:away?'away':'back'});if(!away){Net.lastRx=Math.max(Net.lastRx,performance.now()-5000);if(netInMatch())netWakeLock(true);}
+});
+addEventListener('pagehide',()=>{if(Net.on)netSend({t:'bye'});});
+/* a dropped connection that was not a clean goodbye */
+function netDrop(why){
+  if(!Net.on)return;const c=Net.conn;Net.conn=null;try{c&&c.close();}catch(e){}Net.remoteAway=false;
+  nlog('connection lost: '+why);
+  if(Net.host){
+    const nm=Net.guest&&Net.guest.card&&Net.guest.card.name||'Player 2';Net.dropName=nm;
+    if(netInMatch()){Net.dropT=performance.now();toast(nm+' lost the connection. Waiting 45s for them to come back','#ffb0a8');}
+    else{Net.guest=null;netStatus(nm+' left the room');if(!$('#setup').classList.contains('hide'))buildSetup();else if(!$('#online').classList.contains('hide'))netHostWait();}
+    return;
+  }
+  Net.reconn={until:performance.now()+60000,next:0,n:0};
+  if(netInMatch())toast('Lost the connection to the host. Reconnecting…','#ffb0a8');else netStatus('Lost the connection to the host. Reconnecting…');
+}
+function netGuestGone(nm){
+  Net.guest=null;Net.q=[];Net.lastRx=0;
+  if(netInMatch()){
+    for(const u of Game.units)if(u.ctrl==='p2'){u.ctrl='bot';u.wasP2=true;u.diff='normal';u.pers=pick(Object.keys(PERS));}
+    if(Game.state==='aim'&&Game.cur&&Game.cur.ctrl==='bot'&&Game.tu&&!Game.tu.fired)Game.tu.ai=aiBeginJ(Game.cur);
+    toast(nm+' left. A bot plays for them now','#ffb0a8');nlog(nm+' gone, bot took over');
+  }else{netStatus(nm+' left the room');if(!$('#setup').classList.contains('hide'))buildSetup();else if(!$('#online').classList.contains('hide'))netHostWait();}
+  hud.dirtyTurn=true;
+}
+function netReconnect(){
+  const R0=Net.reconn,now=performance.now();if(!R0)return;
+  if(now>R0.until){Net.reconn=null;nlog('gave up reconnecting');const inM=netInMatch();netClose();
+    if(inM){toast('Could not reconnect to the host','#ffb0a8');setTimeout(()=>{if(!Net.on)goTitle();},2500);}else netMenu('Could not reconnect to the host');return;}
+  if(now<R0.next)return;R0.next=now+4000;R0.n++;
+  const p=Net.peer;if(!p||p.destroyed){Net.reconn=null;netClose();return;}
+  if(p.disconnected){nlog('reconnecting to the room server');try{p.reconnect();}catch(e){}return;}
+  nlog('rejoin try '+R0.n);
+  const c=p.connect(NETPFX+Net.code,{reliable:true,serialization:'json'});
+  c.on('open',()=>{if(Net.conn&&Net.conn.open){c.close();return;}netWire(c);Net.reconn=null;Net.lastRx=performance.now();nlog('rejoined');
+    netSend({t:'hello',ver:NETVER,card:makeCard(profAvatar()),name:PROF.name,mob:Net.myMob||'random',rejoin:netInMatch()});
+    if(netInMatch())toast('Reconnected','#9fe8ff');});
+  c.on('error',e=>nlog('rejoin error '+(e&&e.type||e)));
+}
+function netSendStart(cfg){
+  const m={t:'start',cfg:JSON.parse(JSON.stringify(cfg||Game.cfg)),W:T.W,H:T.H,theme:T.theme.name,gmul:Game.gmul,windMul:Game.windMul,mapName:Game.mapName,snap:netSnap()};
+  return netDeflate(T.mask).then(mask=>{m.mask=mask;netSend(m);nlog('sent full match state');});
+}
 /* message handling */
 function netPump(){
-  if(Net.on&&Net.conn){const now=performance.now();if(now-Net.lastHb>2000){Net.lastHb=now;netSend({t:'hb'});}
-    if(Net.lastRx&&now-Net.lastRx>15000){netLost();return;}}
+  if(!Net.host&&Net.q.length>1){let last=-1,big=0;for(let i=Net.q.length-1;i>=0;i--){const t=Net.q[i].t;if(t==='turn'||t==='over'){big++;if(last<0)last=i;}}
+    if(big>=2&&last>0){const keep={start:1,terrain:1,deny:1,bye:1,room:1,abort:1},old=Net.q.slice(0,last),kept=old.filter(m=>keep[m.t]||m===Net.q[0]&&Net.busy);if(kept.length<old.length){nlog('caught up, skipped '+(old.length-kept.length)+' old messages');Net.q=kept.concat(Net.q.slice(last));}}}
   if(!Net.host&&Net.waitGo&&performance.now()-Net.waitGo>5000&&Game.state==='aim'){Net.waitGo=performance.now();netSend({t:'fire',id:Game.units.indexOf(Game.cur),u:nEnc(Game.cur,0),tu:nEnc(Game.tu,1)});}
   while(Net.q.length&&!Net.busy){
     const m=Net.q[0];
-    if(!Net.host&&(m.t==='turn'||m.t==='fx'||m.t==='over')&&Game.on&&!Game.demo&&(Game.state==='flight'||Game.state==='settle'||Game.state==='intro')&&!Net.localDone){m._w=m._w||performance.now();if(performance.now()-m._w<9000)break;}
+    if(!Net.host&&(m.t==='turn'||m.t==='fx'||m.t==='over')&&Game.on&&!Game.demo&&(Game.state==='flight'||Game.state==='settle'||Game.state==='intro')&&!Net.localDone){m._w=m._w||performance.now();if(performance.now()-m._w<6000)break;}
     Net.q.shift();let r;try{r=netHandle(m);}catch(e){console.error(e);}
     if(r&&r.then){Net.busy=true;r.then(()=>{Net.busy=false;},e=>{console.error(e);Net.busy=false;});}
   }
@@ -1718,13 +1786,18 @@ function netAim(m,force){
 }
 function netHandle(m){
   const t=m.t;
-  if(t==='bye'){netLost(true);return;}
+  if(t==='bye'){nlog('the other player left');netLost(true);return;}
+  if(t==='away'){Net.remoteAway=true;toast((Net.host?(Net.guest&&Net.guest.card&&Net.guest.card.name||'Player 2'):'The host')+' switched away from the game','#ffe27a');return;}
+  if(t==='back'){Net.remoteAway=false;return;}
   if(t==='say'){const u=Game.units[m.id];if(u)say(u,m.txt);return;}
   if(Net.host){
     if(t==='hello'){
       if(m.ver!==NETVER){netSend({t:'deny',why:'You have game version '+m.ver+' and the host has '+NETVER+'. Open the game with internet on both devices so both update, then try again.'});return;}
+      const wasDrop=Net.dropT||Game.units.some(u=>u.wasP2);
       Net.guest={card:readCard(m.card)||randomAvatar(null),mob:m.mob||'random'};if(Net.guest.card&&m.name)Net.guest.card.name=m.name;
-      CFG.p2card=Net.guest.card;sfx('pickup');openSetup();return;}
+      if(netInMatch()&&(wasDrop||m.rejoin)){Net.dropT=0;for(const u of Game.units)if(u.wasP2){u.ctrl='p2';delete u.wasP2;if(Game.cur===u&&Game.tu)Game.tu.ai=null;}
+        nlog((m.name||'Player 2')+' rejoined');toast((m.name||'Player 2')+' is back','#9fe8ff');netSendStart();return;}
+      Net.dropT=0;CFG.p2card=Net.guest.card;sfx('pickup');nlog((m.name||'Player 2')+' joined');openSetup();return;}
     if(t==='mob'){if(Net.guest){Net.guest.mob=m.mk;const s=netGuestSlot();if(s)s.mob=MOBS[m.mk]?m.mk:'random';if(!$('#setup').classList.contains('hide'))buildSetup();else netSendRoom();}return;}
     if(t==='aim'){netAim(m);return;}
     if(t==='fire'){const u=Game.cur;if(Game.state==='aim'&&u&&!netMine(u)&&Game.tu&&!Game.tu.fired&&netAim(m,true)){Game.tu.charging=true;netGo(u);}return;}
@@ -1733,16 +1806,16 @@ function netHandle(m){
     return;
   }
   /* guest */
-  if(t==='deny'){netStatus(m.why);netClose();netMenu(m.why);return;}
+  if(t==='deny'){nlog('refused: '+m.why);netStatus(m.why);netClose();netMenu(m.why);return;}
   if(t==='room'){Net.lobby=m;if(!Game.on||Game.demo||Game.state==='over'){if(!Game.demo)startMatch(demoCfg(),true);netShowLobby();}return;}
-  if(t==='start')return netStartGuest(m);
+  if(t==='start'){Net.reconn=null;nlog('got full match state');netWakeLock(true);return netStartGuest(m);}
   if(t==='abort'){startMatch(demoCfg(),true);netShowLobby();toast('The host went back to the room','#ffe27a');return;}
   if(t==='aim'){netAim(m);return;}
   if(t==='strike'){if(Game.on&&!Game.demo)doStrike(m.x,m.y,{w:12,dmg:70,fx:'bolt'},null,1);return;}
   if(t==='fx'){for(const f of m.l){if(f[0]==='t')Net.toastOrig(f[1],f[2]);else if(f[0]==='c'&&Game.units[f[2]])Net.calloutOrig(f[1],Game.units[f[2]]);}return;}
   if(t==='turn'){
     netApply(m.snap);Net.localDone=false;Net.waitGo=0;Net.skipSent=false;
-    if(m.hash&&m.hash!==netHash())netSend({t:'treq'});
+    if(m.hash&&m.hash!==netHash()){nlog('ground differed, asking the host for it');netSend({t:'treq'});}
     const u=Game.cur;if(u&&Game.state==='aim'){if(u.ctrl==='p1'){banner(Game.sd&&Game.turn===+Game.cfg.sd?'Sudden death':'Your turn');sfx('turn');}else banner(u.name+"'s turn");}
     cam.manual=false;Game.focus=null;return;}
   if(t==='go'){netApply(m.snap);Net.localDone=false;Net.waitGo=0;const u=Game.cur;if(u&&Game.tu&&!Game.tu.fired)Net.fireOrig(u);return;}
@@ -1773,39 +1846,34 @@ function netSendRoom(){
   netSend({t:'room',code:Net.code,host:PROF.name,gt:CFG.gt,size:CFG.size,map:MAPS[CFG.map]?MAPS[CFG.map].name:'Random',slots});
 }
 function netStatus(t){const e=$('#onmsg');if(e)e.textContent=t||'';}
-function netClose(){try{Net.conn&&Net.conn.close();}catch(e){}try{Net.peer&&Net.peer.destroy();}catch(e){}Net.conn=null;Net.peer=null;Net.on=false;Net.q=[];Net.busy=false;Net.guest=null;Net.lobby=null;Net.waitGo=0;Net.lastRx=0;
+function netClose(){netWakeLock(false);Net.reconn=null;Net.dropT=0;Net.remoteAway=false;try{Net.conn&&Net.conn.close();}catch(e){}try{Net.peer&&Net.peer.destroy();}catch(e){}Net.conn=null;Net.peer=null;Net.on=false;Net.q=[];Net.busy=false;Net.guest=null;Net.lobby=null;Net.waitGo=0;Net.lastRx=0;
   if(Net.oldMode!=null){CFG.mode=Net.oldMode;CFG.p2card=Net.oldP2;Net.oldMode=null;for(const tm of ['A','B'])for(const s of CFG.slots[tm])if(s.ctrl==='p2'&&CFG.mode==='bots')s.ctrl='bot';}}
 function netLeave(){if(!Net.on&&!Net.peer)return;netSend({t:'bye'});setTimeout(netClose,150);Net.on=false;}
 function netLost(clean){
   if(!Net.on)return;
-  if(Net.host){
-    const nm=Net.guest&&Net.guest.card&&Net.guest.card.name||'Player 2';
-    try{Net.conn&&Net.conn.close();}catch(e){}Net.conn=null;Net.guest=null;Net.q=[];Net.lastRx=0;
-    if(Game.on&&!Game.demo&&Game.state!=='over'){
-      for(const u of Game.units)if(u.ctrl==='p2'){u.ctrl='bot';u.diff='normal';u.pers=pick(Object.keys(PERS));}
-      if(Game.state==='aim'&&Game.cur&&Game.cur.ctrl==='bot'&&Game.tu&&!Game.tu.fired)Game.tu.ai=aiBeginJ(Game.cur);
-      toast(nm+' left. A bot plays for them now','#ffb0a8');
-    }else{netStatus(nm+' left the room');if(!$('#setup').classList.contains('hide'))buildSetup();else if(!$('#online').classList.contains('hide'))netHostWait();}
-    hud.dirtyTurn=true;return;
-  }
-  const inMatch=Game.on&&!Game.demo&&Game.state!=='over';netClose();
+  if(Net.host){const nm=Net.guest&&Net.guest.card&&Net.guest.card.name||'Player 2';try{Net.conn&&Net.conn.close();}catch(e){}Net.conn=null;Net.dropT=0;netGuestGone(nm);return;}
+  const inMatch=netInMatch();netClose();
   if(inMatch){toast('The host left the match','#ffb0a8');setTimeout(()=>{if(!Net.on)goTitle();},2500);}else netMenu(clean?'The host closed the room':'Lost the connection to the host');
 }
 function netWire(c){
   Net.conn=c;Net.lastRx=performance.now();
-  c.on('data',netRecv);c.on('close',()=>{if(Net.conn===c)netLost(false);});c.on('error',e=>{console.error(e);});
+  c.on('data',netRecv);c.on('close',()=>{if(Net.conn===c){nlog('data channel closed');netDrop('channel closed');}});c.on('error',e=>{nlog('channel error '+(e&&e.type||e));});
+  if(c.peerConnection)c.peerConnection.addEventListener('iceconnectionstatechange',()=>{const st=c.peerConnection&&c.peerConnection.iceConnectionState;nlog('link '+st);});
 }
 function netCode(){let s='';for(let i=0;i<5;i++)s+=NETCODES[Math.floor(Math.random()*NETCODES.length)];return s;}
 function netHost(){
   if(typeof Peer==='undefined'){netStatus('Online play could not load');return;}
   netClose();Net.host=true;Net.code=netCode();netStatus('Opening a room…');
   const p=Net.peer=new Peer(NETPFX+Net.code,netPeerOpts());
-  p.on('open',()=>{Net.on=true;Net.oldMode=CFG.mode;Net.oldP2=CFG.p2card;CFG.mode='online';netHostWait();});
+  p.on('open',()=>{if(Net.on){nlog('room server back');return;}Net.on=true;Net.oldMode=CFG.mode;Net.oldP2=CFG.p2card;CFG.mode='online';nlog('hosting room '+Net.code);netHostWait();});
+  p.on('disconnected',()=>{nlog('lost the room server');setTimeout(()=>{if(Net.peer===p&&!p.destroyed&&p.disconnected)try{p.reconnect();}catch(e){}},2000);});
   p.on('connection',c=>{
-    if(Net.conn&&Net.conn.open){c.on('open',()=>{c.send({t:'deny',why:'This room already has two players.'});setTimeout(()=>c.close(),300);});return;}
+    if(Net.conn&&Net.conn.open){c.on('data',raw=>{if(c._ok)return;let m=null;try{m=typeof raw==='string'?JSON.parse(raw):raw;}catch(e){}
+      if(m&&m.t==='hello'&&m.rejoin&&Net.guest&&Net.guest.card&&m.name===Net.guest.card.name){c._ok=true;const old=Net.conn;Net.conn=null;try{old.close();}catch(e){}netWire(c);Net.q.push(m);nlog('replaced a stale link');}
+      else{c._ok=true;c.send({t:'deny',why:'This room already has two players.'});setTimeout(()=>c.close(),300);}});return;}
     netWire(c);
   });
-  p.on('error',e=>{if(e.type==='unavailable-id'){netHost();return;}netStatus(e.type==='network'||e.type==='server-error'||e.type==='socket-error'?'Could not reach the room server. Check your internet connection.':'Online error: '+e.type);});
+  p.on('error',e=>{nlog('error '+e.type);if(e.type==='unavailable-id'&&!Net.on){netHost();return;}if(Net.on&&(e.type==='network'||e.type==='server-error'||e.type==='socket-error'||e.type==='disconnected'))return;netStatus(e.type==='network'||e.type==='server-error'||e.type==='socket-error'?'Could not reach the room server. Check your internet connection.':'Online error: '+e.type);});
 }
 function netJoin(code){
   code=(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length!==5){netStatus('Room codes have 5 letters and numbers, like K7QPX');return;}
@@ -1815,9 +1883,10 @@ function netJoin(code){
   const to=setTimeout(()=>{if(!Net.on&&Net.peer===p){netStatus('No answer from room '+code+'. Check the code and your internet connection.');netClose();}},15000);
   p.on('open',()=>{
     const c=p.connect(NETPFX+code,{reliable:true,serialization:'json'});netWire(c);
-    c.on('open',()=>{clearTimeout(to);Net.on=true;Net.lastRx=performance.now();netSend({t:'hello',ver:NETVER,card:makeCard(profAvatar()),name:PROF.name,mob:Net.myMob||'random'});netStatus('Joined. Waiting for the host…');});
+    c.on('open',()=>{clearTimeout(to);Net.on=true;Net.lastRx=performance.now();nlog('joined room '+code);netSend({t:'hello',ver:NETVER,card:makeCard(profAvatar()),name:PROF.name,mob:Net.myMob||'random'});netStatus('Joined. Waiting for the host…');});
   });
-  p.on('error',e=>{clearTimeout(to);netStatus(e.type==='peer-unavailable'?'There is no open room with code '+code:e.type==='network'||e.type==='server-error'||e.type==='socket-error'?'Could not reach the room server. Check your internet connection.':'Online error: '+e.type);netClose();});
+  p.on('disconnected',()=>{nlog('lost the room server');});
+  p.on('error',e=>{nlog('error '+e.type);if(Net.reconn)return;clearTimeout(to);netStatus(e.type==='peer-unavailable'?'There is no open room with code '+code:e.type==='network'||e.type==='server-error'||e.type==='socket-error'?'Could not reach the room server. Check your internet connection.':'Online error: '+e.type);netClose();});
 }
 /* screens */
 function openOnline(){if(Net.on){if(Net.host)netHostWait();else netShowLobby();}else netMenu('');show('online');}
@@ -1825,8 +1894,8 @@ function netMenu(msg){
   $('#onbody').innerHTML=`<p class="onlead">One player hosts a room and sends the room code to the other player, who types it in below. You both need the internet while you play.</p>
     <div class="stack"><button class="btn" id="onhost">Host a room</button></div>
     <div class="onjoin"><label for="oncode">Room code</label><input id="oncode" maxlength="5" placeholder="K7QPX" spellcheck="false" autocomplete="off"><button class="btn ghost small" id="onjoinbtn">Join</button></div>
-    <p class="onmsg" id="onmsg"></p><p class="note">Game version ${NETVER}</p>`;
-  netStatus(msg);$('#onhost').onclick=()=>{sfx('click');netHost();};
+    <p class="onmsg" id="onmsg"></p><p class="note">Game version ${NETVER} ${NLOG.length?'<button class="btn ghost small" id="onlog">Copy log</button>':''}</p>`;
+  netStatus(msg);const lb=$('#onlog');if(lb)lb.onclick=()=>netCopyLog();$('#onhost').onclick=()=>{sfx('click');netHost();};
   const go=()=>{sfx('click');netJoin($('#oncode').value);};$('#onjoinbtn').onclick=go;$('#oncode').onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')go();};
   if($('#online').classList.contains('hide')&&msg)show('online');
 }
@@ -3886,7 +3955,7 @@ endMatch=function(team){
   if(!demo&&Net.on&&!Net.host&&!Net.starting)return;
   if(demo&&Net.on&&Net.host&&Net.guest&&Game.on&&!Game.demo&&Game.state!=='over')netSend({t:'abort'});
   _sm(cfg,demo);
-  if(!demo&&Net.on&&Net.host&&Net.guest){const m={t:'start',cfg:JSON.parse(JSON.stringify(cfg)),W:T.W,H:T.H,theme:T.theme.name,gmul:Game.gmul,windMul:Game.windMul,mapName:Game.mapName,snap:netSnap()};netDeflate(T.mask).then(mask=>{m.mask=mask;netSend(m);});}
+  if(!demo&&Net.on&&Net.host&&Net.guest){netSendStart(cfg);netWakeLock(true);nlog('match started');}
 };}
 {const _gt=goTitle;goTitle=function(){if(Net.on||Net.peer)netLeave();_gt();};}
 {const _bs=buildSetup;buildSetup=function(){
@@ -3894,7 +3963,7 @@ endMatch=function(team){
   _bs();const on=Net.on&&Net.host;$('#moderow').classList.toggle('hide',on);$('#roomchip').classList.toggle('hide',!on);
   if(on){$('#roomchip').innerHTML=`Room <b>${Net.code}</b> · ${Net.guest?((Net.guest.card&&Net.guest.card.name)||'Player 2')+' joined':'Waiting for a player'}`;document.querySelectorAll('#setup select.ctrl').forEach(x=>x.disabled=true);netSendRoom();}
 };}
-{const _sh=show;show=function(id){_sh(id);const g=Net.on&&!Net.host;document.querySelectorAll('#over [data-go="setup"],#rematchbtn,#restartbtn,#pause [data-go="setup"]').forEach(b=>b.classList.toggle('hide',g));};}
+{const _sh=show;show=function(id){_sh(id);const g=Net.on&&!Net.host;$('#pauselog').classList.toggle('hide',!Net.on&&!NLOG.length);$('#pauselog').onclick=()=>netCopyLog();document.querySelectorAll('#over [data-go="setup"],#rematchbtn,#restartbtn,#pause [data-go="setup"]').forEach(b=>b.classList.toggle('hide',g));};}
 {const _sb=$('#startbtn').onclick;$('#startbtn').onclick=e=>{if(Net.on&&Net.host&&!Net.guest){const c=$('#roomchip');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');return;}_sb(e);};}
 
 /* ---------- locker ---------- */
