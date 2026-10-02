@@ -277,6 +277,26 @@ canvas.badge{vertical-align:middle}#lkstats .rk{display:flex;align-items:center;
 .onteams li{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.08)}.onteams li span{color:var(--muted)}
 .onme{display:flex;gap:12px;align-items:center}.onme .port{width:132px}.onme .port canvas{width:100%;height:auto}.onme p{margin:2px 0 0;color:var(--muted)}
 @keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.sytotal{font-weight:900;color:#ffd23d;font-size:18px}
+.sychs{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}.sychs button{flex:1;min-width:120px;padding:7px 8px;font-weight:800;font-size:13px;border-radius:8px;line-height:1.2}.sychs button small{display:block;font-size:11px;color:#ffd23d}.sychs button:disabled{opacity:.35}
+.syintro{margin:6px 0 8px;color:#dfe6f4}
+.sychest{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.sychest span{background:rgba(0,0,0,.22);border-radius:8px;padding:4px 10px;font-size:12px;color:#c9d1e0}.sychest span.got{color:#ffd23d;box-shadow:inset 0 0 0 1px #ffd23d}
+.systages{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.sycard{text-align:left;border-radius:12px;background:rgba(255,255,255,.06);padding:8px 10px;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:2px}
+.sycard:hover:not(:disabled){box-shadow:inset 0 0 0 2px var(--gold)}.sycard.sel{box-shadow:inset 0 0 0 2px #fff;background:rgba(255,255,255,.12)}.sycard:disabled{opacity:.4}
+.sycard.boss{background:linear-gradient(rgba(224,57,42,.25),rgba(255,255,255,.04))}
+.sycode{font-size:11px;font-weight:800;color:#9fe8ff}.sycard b{font-size:14px}.symeta{font-size:11px;color:var(--muted)}.synew{font-size:10.5px;font-weight:800;color:#5be38a}
+.stars i{font-style:normal;color:rgba(255,255,255,.22);font-size:16px;letter-spacing:1px}.stars i.on{color:#ffd23d;text-shadow:0 0 6px rgba(255,210,61,.6)}
+.syinfo{background:rgba(0,0,0,.18);border-radius:12px;padding:12px 14px}
+.syhead{display:flex;align-items:center;gap:10px}.syhead h3{margin:0;font-size:20px}.sydesc{margin:4px 0 10px;color:#dfe6f4}
+.syinfo h4{margin:8px 0 4px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.syrow{display:flex;gap:18px;flex-wrap:wrap}.syfoes{display:flex;gap:8px;flex-wrap:wrap}
+.syfoe{width:96px;text-align:center;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center}.syfoe canvas{width:96px;height:auto;border-radius:8px}.syfoe small{color:var(--muted);font-weight:600}
+.syfoe.me{border-radius:10px;padding:0;background:none;color:inherit}.syfoe.me:hover canvas{box-shadow:0 0 0 2px var(--gold)}
+.sygoals{list-style:none;margin:0;padding:0}.sygoals li{font-size:13px;padding:2px 0;color:#c9d1e0}.sygoals li.ok{color:#ffd23d}
+.overstory{background:rgba(0,0,0,.22);border-radius:10px;padding:8px 12px;margin:8px 0}.overstory .osh{font-weight:900;display:flex;gap:10px;align-items:center}.overstory ul{list-style:none;margin:4px 0;padding:0;font-size:13px}.overstory li{color:#c9d1e0}.overstory li.ok{color:#ffd23d}.overstory .orw{color:#5be38a;font-weight:700;font-size:13px;margin:4px 0 0}
+@media (max-width:760px){.systages{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -312,6 +332,7 @@ canvas.badge{vertical-align:middle}#lkstats .rk{display:flex;align-items:center;
     <div class="logo">Crater<br>Kings</div>
     <p class="tag">Turn-based artillery for up to eight mobiles. Read the wind, set your angle and power, and blow the other team off the map.</p>
     <div class="stack">
+      <button class="btn" data-go="story">Story</button>
       <button class="btn" data-go="setup">Play</button>
       <button class="btn ghost" data-go="online">Online</button>
       <button class="btn ghost" data-go="locker">Locker <span class="tcoins" id="tcoins"></span></button>
@@ -338,6 +359,7 @@ canvas.badge{vertical-align:middle}#lkstats .rk{display:flex;align-items:center;
       <p>Blasts dig holes, and a mobile drops as soon as the ground under it is blown away. Dig under an enemy to bury it in a pit or blast through to drop it off the map, which knocks it out whatever its HP.</p>
       <p>Tornados lift and spin any shot that flies into them.</p>
       <p>Trick shots deal bonus damage. A shot fired at 70 degrees or higher gets High Angle, a shot that lands behind you gets Backshot and a shot that stays in the air a long time gets Hang Time.</p>
+      <p>Story is 25 stages in 5 chapters, and the bots get tougher as you go. Each stage gives up to 3 stars: one for winning and two for its own goals. You get coins the first time you clear a stage, an item from each boss, and a chest at 5, 10 and 15 stars in each chapter. Stages where you have an ally can be played with a friend instead: tap Play with a friend, send them the room code, and they join your team.</p>
       <p>Online lets you play someone on another device. One of you taps Host a room and sends the 5-letter code, and the other types it in under Online. The host picks the map and the game, each of you keeps the coins and rank you earn, and if the other player leaves, a bot takes over their mobile.</p>
       <p>Pick a map in the room. Random hills, islands and sky isles are new every match. The named maps stay the same so you can learn them, and some have their own rules: Sky Steps has lighter gravity and Twin Spires has stronger wind.</p>
       <p>Pick the game in the match setup. Solo is the normal match. In Score each team shares a pool of lives, two per player, and a knocked-out mobile parachutes back in while lives remain. In Tag every player brings two mobiles and swaps with the Tag button or T, which adds 200 delay, and the second one jumps in when the first is knocked out. Jewel turns damage off: shoot the floating jewels to score, blue ones are worth 1 and gold ones 3, and the team with more points wins when they run out.</p>
@@ -377,6 +399,18 @@ canvas.badge{vertical-align:middle}#lkstats .rk{display:flex;align-items:center;
       <div class="team B"><h3>Red team</h3><div id="slotsB"></div></div>
     </div>
     <div class="row-btns"><button class="btn ghost" data-go="title">Back</button><button class="btn" id="startbtn">Ready</button></div>
+  </div>
+</div>
+
+<div id="story" class="screen hide">
+  <div class="panel wide">
+    <div class="lhead"><h2>Story</h2><div class="sytotal" id="sytotal"></div></div>
+    <div class="seg sychs" id="sychs"></div>
+    <p class="syintro" id="syintro"></p>
+    <div class="sychest" id="sychest"></div>
+    <div class="systages" id="systages"></div>
+    <div class="syinfo" id="syinfo"></div>
+    <div class="row-btns"><button class="btn ghost" data-go="title">Back</button></div>
   </div>
 </div>
 
@@ -423,9 +457,10 @@ canvas.badge{vertical-align:middle}#lkstats .rk{display:flex;align-items:center;
   <div class="panel" style="max-width:640px">
     <h2 id="overtitle">Blue team wins</h2>
     <table class="stats" id="overstats"></table>
+    <div class="overstory hide" id="overstory"></div>
     <p class="coinline" id="overcoins"></p>
     <p class="coinline" id="overrank"></p>
-    <div class="row-btns"><button class="btn ghost" data-go="title">Main menu</button><button class="btn ghost" data-go="setup">Change setup</button><button class="btn" id="rematchbtn">Rematch</button></div>
+    <div class="row-btns"><button class="btn ghost" data-go="title">Main menu</button><button class="btn ghost" data-go="setup">Change setup</button><button class="btn ghost hide" id="storymapbtn">Story</button><button class="btn" id="rematchbtn">Rematch</button><button class="btn hide" id="nextstagebtn">Next stage</button></div>
   </div>
 </div>
 
@@ -1797,8 +1832,8 @@ function netHandle(m){
       Net.guest={card:readCard(m.card)||randomAvatar(null),mob:m.mob||'random'};if(Net.guest.card&&m.name)Net.guest.card.name=m.name;
       if(netInMatch()&&(wasDrop||m.rejoin)){Net.dropT=0;for(const u of Game.units)if(u.wasP2){u.ctrl='p2';delete u.wasP2;if(Game.cur===u&&Game.tu)Game.tu.ai=null;}
         nlog((m.name||'Player 2')+' rejoined');toast((m.name||'Player 2')+' is back','#9fe8ff');netSendStart();return;}
-      Net.dropT=0;CFG.p2card=Net.guest.card;sfx('pickup');nlog((m.name||'Player 2')+' joined');openSetup();return;}
-    if(t==='mob'){if(Net.guest){Net.guest.mob=m.mk;const s=netGuestSlot();if(s)s.mob=MOBS[m.mk]?m.mk:'random';if(!$('#setup').classList.contains('hide'))buildSetup();else netSendRoom();}return;}
+      Net.dropT=0;CFG.p2card=Net.guest.card;sfx('pickup');nlog((m.name||'Player 2')+' joined');if(Net.story!=null){netStoryWait();netSendRoom();}else openSetup();return;}
+    if(t==='mob'){if(Net.guest){Net.guest.mob=m.mk;const s=netGuestSlot();if(s)s.mob=MOBS[m.mk]?m.mk:'random';if(Net.story!=null){if(!$('#online').classList.contains('hide'))netStoryWait();netSendRoom();}else if(!$('#setup').classList.contains('hide'))buildSetup();else netSendRoom();}return;}
     if(t==='aim'){netAim(m);return;}
     if(t==='fire'){const u=Game.cur;if(Game.state==='aim'&&u&&!netMine(u)&&Game.tu&&!Game.tu.fired&&netAim(m,true)){Game.tu.charging=true;netGo(u);}return;}
     if(t==='skip'){const u=Game.cur;if(Game.state==='aim'&&u&&!netMine(u)&&Game.tu&&!Game.tu.fired){Game.tu.skipped=true;Game.tu.fired=true;Game.state='settle';Game.stateT=0;}return;}
@@ -1842,11 +1877,13 @@ function netAfterStep(){
 function netGuestSlot(){for(const tm of ['A','B'])for(const s of CFG.slots[tm].slice(0,CFG.size))if(s.ctrl==='p2')return s;return null;}
 function netSendRoom(){
   if(!Net.on||!Net.host||!Net.guest)return;
-  const slots=[];for(const tm of ['A','B'])CFG.slots[tm].slice(0,CFG.size).forEach(s=>slots.push({tm,ctrl:s.ctrl,mob:s.mob,diff:s.diff}));
-  netSend({t:'room',code:Net.code,host:PROF.name,gt:CFG.gt,size:CFG.size,map:MAPS[CFG.map]?MAPS[CFG.map].name:'Random',slots});
+  const C0=Net.story!=null?storyCfg(Net.story,true):CFG,slots=[];
+  for(const tm of ['A','B'])C0.slots[tm].slice(0,C0.counts?C0.counts[tm]:C0.size).forEach(s=>slots.push({tm,ctrl:s.ctrl,mob:s.mob,diff:s.diff,name:s.boss&&s.boss.name||null}));
+  const S=Net.story!=null?STAGES[Net.story]:null;
+  netSend({t:'room',code:Net.code,host:PROF.name,gt:C0.gt,size:C0.size,teams:C0.counts?C0.counts.A+'v'+C0.counts.B:null,story:S?S.code+' '+S.name:null,map:MAPS[C0.map]?MAPS[C0.map].name:'Random',slots});
 }
 function netStatus(t){const e=$('#onmsg');if(e)e.textContent=t||'';}
-function netClose(){netWakeLock(false);Net.reconn=null;Net.dropT=0;Net.remoteAway=false;try{Net.conn&&Net.conn.close();}catch(e){}try{Net.peer&&Net.peer.destroy();}catch(e){}Net.conn=null;Net.peer=null;Net.on=false;Net.q=[];Net.busy=false;Net.guest=null;Net.lobby=null;Net.waitGo=0;Net.lastRx=0;
+function netClose(){netWakeLock(false);Net.story=null;Net.storyCfg=null;Net.reconn=null;Net.dropT=0;Net.remoteAway=false;try{Net.conn&&Net.conn.close();}catch(e){}try{Net.peer&&Net.peer.destroy();}catch(e){}Net.conn=null;Net.peer=null;Net.on=false;Net.q=[];Net.busy=false;Net.guest=null;Net.lobby=null;Net.waitGo=0;Net.lastRx=0;
   if(Net.oldMode!=null){CFG.mode=Net.oldMode;CFG.p2card=Net.oldP2;Net.oldMode=null;for(const tm of ['A','B'])for(const s of CFG.slots[tm])if(s.ctrl==='p2'&&CFG.mode==='bots')s.ctrl='bot';}}
 function netLeave(){if(!Net.on&&!Net.peer)return;netSend({t:'bye'});setTimeout(netClose,150);Net.on=false;}
 function netLost(clean){
@@ -1900,6 +1937,7 @@ function netMenu(msg){
   if($('#online').classList.contains('hide')&&msg)show('online');
 }
 function netHostWait(){
+  if(Net.story!=null)return netStoryWait();
   $('#onbody').innerHTML=`<p class="onlead">Send this room code to the other player. The room opens as soon as they join.</p><div class="oncode">${Net.code}</div><p class="onmsg" id="onmsg">Waiting for a player…</p><p class="note">Game version ${NETVER}</p>`;
   show('online');
 }
@@ -1907,15 +1945,165 @@ function netShowLobby(){
   const L=Net.lobby;show('online');
   if(!L){$('#onbody').innerHTML=`<p class="onlead">Joined room ${Net.code}. Waiting for the host…</p><p class="onmsg" id="onmsg"></p>`;return;}
   const me=L.slots.find(s=>s.ctrl==='p2'),mm=Net.myMob||me&&me.mob||'random',gt={solo:'Solo',score:'Score',tag:'Tag',jewel:'Jewel'}[L.gt]||L.gt;
-  const who=s=>s.ctrl==='p1'?L.host:s.ctrl==='p2'?PROF.name+' (you)':'Bot, '+(DIFF[s.diff]?DIFF[s.diff].label:'Normal');
+  const who=s=>s.ctrl==='p1'?L.host:s.ctrl==='p2'?PROF.name+' (you)':(s.name||'Bot')+', '+(DIFF[s.diff]?DIFF[s.diff].label:'Normal');
   const team=tm=>L.slots.filter(s=>s.tm===tm).map(s=>`<li>${who(s)}<span>${s.mob==='random'?'Random':MOBS[s.mob]?MOBS[s.mob].name:s.mob}</span></li>`).join('');
-  $('#onbody').innerHTML=`<p class="onlead">Room ${L.code}, hosted by ${L.host}. The host picks the map and the game and starts the match.</p>
-    <div class="onsum"><span>Game <b>${gt}</b></span><span>Teams <b>${L.size}v${L.size}</b></span><span>Map <b>${L.map}</b></span></div>
+  $('#onbody').innerHTML=`<p class="onlead">${L.story?'Story stage '+L.story+' with '+L.host+'. You fight on '+L.host+"'s team and "+L.host+' starts the stage.':'Room '+L.code+', hosted by '+L.host+'. The host picks the map and the game and starts the match.'}</p>
+    <div class="onsum"><span>Game <b>${gt}</b></span><span>Teams <b>${L.teams||L.size+'v'+L.size}</b></span><span>Map <b>${L.map}</b></span></div>
     <div class="onteams"><div><h3 style="color:${TEAMCOL.A}">Blue team</h3><ul>${team('A')}</ul></div><div><h3 style="color:${TEAMCOL.B}">Red team</h3><ul>${team('B')}</ul></div></div>
     <div class="onme"><button class="port" id="onmob" title="Pick your mobile"><canvas width="264" height="208"></canvas><span>Change</span></button><div><b>Your mobile</b><p>${mm==='random'?'Random':MOBS[mm].name}</p></div></div>
     <p class="onmsg" id="onmsg"></p>`;
   const tm=me?me.tm:'B';drawPortrait($('#onmob canvas'),mm==='random'?null:mm,tm,null,profAvatar());
   $('#onmob').onclick=()=>{const s={mob:mm};Net.pickSlot=s;openMobPicker(s,tm);};
+}
+
+/* ---------- story mode ---------- */
+// e: enemy slots [mob, diff, boss?]; al: ally mobiles next to you; goals: star 2 and 3 (star 1 is always the win)
+const CHAPTERS=[
+  {name:'Rookie Hills',intro:'The local crews pick on anyone new. Show them how a cannon works.',diff:'easy',ally:'normal',coins:100,itemRar:'r'},
+  {name:'Windy Isles',intro:'Out over the water the wind does half the aiming. Learn to read it.',diff:'normal',ally:'normal',coins:150,itemRar:'r'},
+  {name:'Frozen Front',intro:'The ice crews dig in and shoot back hard. Every miss gets punished here.',diff:'hard',ally:'hard',coins:200,itemRar:'e'},
+  {name:'Ember Canyon',intro:'The canyon belongs to the best shooters around, and they play dirty.',diff:'nightmare',ally:'hard',coins:250,itemRar:'e'},
+  {name:'Crater Throne',intro:'Everyone left standing wants the crown. Beat them all and it is yours.',diff:'nightmare',ally:'nightmare',coins:300,itemRar:'l'}
+];
+const STAGES=[
+  // chapter 1
+  {name:'First Shot',gt:'solo',map:'hills',wind:'calm',weather:'off',al:[],e:[['pogo']],goals:[['turns',12],['hp',50]],desc:'One frog, calm wind and no weather. Take your time and find the range.'},
+  {name:'Two on Two',gt:'solo',map:'bowl',wind:'calm',weather:'off',al:['bloom'],e:[['bruno'],['slush']],goals:[['alive'],['turns',28]],desc:'You get a healer on your side. Keep each other alive.'},
+  {name:'Gem Hunt',gt:'jewel',map:'craters',wind:'normal',weather:'off',al:[],e:[['hive']],goals:[['jewels',6],['turns',24]],desc:'No damage in this one. Shoot the floating jewels before the bee does.'},
+  {name:'Bridge Fight',gt:'solo',map:'bridge',wind:'normal',weather:'on',al:['drillbit'],e:[['sparky'],['gale']],goals:[['alive'],['turns',30]],desc:'A thin bridge over a pit. Dig it out from under them.'},
+  {name:'Big Bruno',gt:'solo',map:'hills',wind:'normal',weather:'on',al:['valor'],e:[['bruno',null,{name:'Big Bruno',hp:1.5}],['pogo']],goals:[['alive'],['hp',40]],desc:'The Rookie Hills boss has a lot more health than a normal Bruno. Knock out the frog first.',boss:1},
+  // chapter 2
+  {name:'Island Hop',gt:'solo',map:'isles',wind:'wild',weather:'off',al:[],e:[['gale']],goals:[['turns',14],['hp',50]],desc:'Small islands and wild wind. A miss here falls into the sky.'},
+  {name:'Tag Team',gt:'tag',map:'random',wind:'normal',weather:'on',al:[],e:[['scorch',null,{mob2:'splash'}]],goals:[['turns',24],['hp',40]],desc:'Each side brings two mobiles. Swap with Tag when one gets low.'},
+  {name:'Last Lives',gt:'score',map:'islands',wind:'normal',weather:'on',al:['stomper'],e:[['rumble'],['hive']],goals:[['kos',2],['turns',40]],desc:'Each team shares a pool of lives. Lose as few as you can.'},
+  {name:'Sky Steps',gt:'solo',map:'steps',wind:'normal',weather:'on',al:['magna'],e:[['nimbus'],['valor']],goals:[['alive'],['turns',30]],desc:'Light gravity on the floating steps. Shots fly further than you expect.'},
+  {name:'Storm Twins',gt:'solo',map:'spires',wind:'wild',weather:'on',al:['beacon'],e:[['nimbus',null,{name:'Storm Ram',hp:1.6}],['sparky'],['gale']],goals:[['alive'],['hp',40]],desc:'Three against two on the windy spires. The Storm Ram calls lightning on every hit.',boss:1},
+  // chapter 3
+  {name:'Thin Ice',gt:'solo',map:'lake',wind:'normal',weather:'off',al:[],e:[['slush']],goals:[['turns',16],['hp',50]],desc:'A sheet of ice over open sky. Dig through it and drop the bear.'},
+  {name:'Jewel Rush',gt:'jewel',map:'fortress',wind:'normal',weather:'on',al:['spiral'],e:[['magna'],['spiral']],goals:[['jewels',8],['turns',30]],desc:'Fight your way to the jewels inside the floating fortress.'},
+  {name:'The Wall',gt:'solo',map:'wall',wind:'normal',weather:'on',al:['pogo'],e:[['stomper'],['bruno']],goals:[['alive'],['turns',30]],desc:'A huge wall in the middle stops low shots. Go high.'},
+  {name:'Tag Out',gt:'tag',map:'random',wind:'normal',weather:'on',al:['bloom'],e:[['drillbit',null,{mob2:'rumble'}],['beacon',null,{mob2:'hive'}]],goals:[['kos',2],['turns',34]],desc:'Two against two, and everyone brings a second mobile.'},
+  {name:'Frost King',gt:'solo',map:'lake',wind:'wild',weather:'on',al:['scorch'],e:[['slush',null,{name:'Frost King',hp:1.8}],['splash'],['bloom']],goals:[['alive'],['hp',40]],desc:'The Frost King freezes anyone close to him and his healer keeps him standing. Take her out early.',boss:1},
+  // chapter 4
+  {name:'Fire Pit',gt:'solo',map:'craters',wind:'normal',weather:'on',al:[],e:[['scorch']],goals:[['turns',14],['hp',50]],desc:'The ground is already full of holes and the dragon keeps setting it on fire.'},
+  {name:'Score Rush',gt:'score',map:'random',wind:'normal',weather:'on',al:['valor'],e:[['stomper'],['hive']],goals:[['kos',2],['turns',40]],desc:'Rockets and bugs everywhere. Spend your lives carefully.'},
+  {name:'Twin Spires',gt:'solo',map:'spires',wind:'wild',weather:'on',al:['gale'],e:[['valor'],['gale']],goals:[['alive'],['turns',30]],desc:'Two towers and strong wind. Use the wind or it uses you.'},
+  {name:'Outnumbered',gt:'solo',map:'random',wind:'normal',weather:'on',al:['bruno'],e:[['magna'],['sparky'],['pogo']],goals:[['alive'],['hp',40]],desc:'Three of them, two of you. Pick your targets.'},
+  {name:'Inferno Duke',gt:'solo',map:'fortress',wind:'normal',weather:'on',al:['splash'],e:[['scorch',null,{name:'Inferno Duke',hp:2,atk:.2}],['beacon']],goals:[['alive'],['hp',40]],desc:'The Inferno Duke hits harder than any dragon you have met, and his satellite never stops firing.',boss:1},
+  // chapter 5
+  {name:'Gauntlet',gt:'solo',map:'random',wind:'wild',weather:'on',al:[],e:[['valor',null,{hp:1.3}]],goals:[['turns',14],['hp',50]],desc:'A tougher-than-normal knight, one on one.'},
+  {name:'Gem Kings',gt:'jewel',map:'random',wind:'normal',weather:'on',al:['spiral'],e:[['gale'],['magna']],goals:[['jewels',8],['turns',30]],desc:'The best jewel hunters in the land. Beat them to the gold ones.'},
+  {name:'Royal Tag',gt:'tag',map:'random',wind:'normal',weather:'on',al:['bloom'],e:[['nimbus',null,{mob2:'sparky'}],['scorch',null,{mob2:'stomper'}]],goals:[['kos',2],['turns',34]],desc:'Four mobiles on each side. Swap at the right time.'},
+  {name:'Last Stand',gt:'score',map:'random',wind:'wild',weather:'on',al:['rumble'],e:[['bruno'],['magna'],['hive']],goals:[['kos',3],['turns',44]],desc:'Three against two and a shared pool of lives.'},
+  {name:'Crater King',gt:'solo',map:'bowl',wind:'normal',weather:'on',al:['bloom'],e:[['bruno',null,{name:'Crater King',hp:2.5,atk:.3}],['beacon'],['valor']],goals:[['alive'],['hp',40]],desc:'The Crater King sits in the bottom of the bowl with two guards. Take the throne.',boss:1}
+];
+STAGES.forEach((s,i)=>{s.i=i;s.ch=Math.floor(i/5);s.code=(s.ch+1)+'-'+(i%5+1);});
+const GTNAME={solo:'Solo',score:'Score',tag:'Tag',jewel:'Jewel'};
+function storyProf(){if(!PROF.story)PROF.story={stars:{},clear:{},chests:{},mob:'random'};return PROF.story;}
+const stageStars=i=>storyProf().stars[i]||0;
+const chapterStars=ch=>STAGES.filter(s=>s.ch===ch).reduce((n,s)=>n+stageStars(s.i),0);
+const stageOpen=i=>i===0||!!storyProf().clear[i-1];
+function goalText(g,s){
+  if(g[0]==='win')return s.gt==='jewel'?'Win the jewel count':'Win';
+  if(g[0]==='turns')return'Win by turn '+g[1];
+  if(g[0]==='hp')return'Win with your mobile at '+g[1]+'% health or more';
+  if(g[0]==='alive')return'Win without anyone on your team getting knocked out';
+  if(g[0]==='kos')return'Win with your team knocked out '+g[1]+' times or fewer';
+  if(g[0]==='jewels')return'Win with '+g[1]+' jewel points or more';
+  return'';
+}
+function storyCfg(i,friend){
+  const S=STAGES[i],C=CHAPTERS[S.ch],P=storyProf(),c=defaultCfg();
+  Object.assign(c,{gt:S.gt,map:S.map,wind:S.wind,tornado:S.weather,drops:'on',time:'30',sd:'40',spawn:'sides',guide:CFG.guide||'short',ruler:CFG.ruler||'on',mode:friend?'online':'bots',story:i});
+  const myBag=(CFG.slots.A[0]&&CFG.slots.A[0].bag)||DEFAULT_BAG;
+  c.slots.A=[{ctrl:'p1',mob:P.mob||'random',bag:myBag.slice(),mob2:'random'}];
+  S.al.forEach((m,k)=>c.slots.A.push(friend&&k===0?{ctrl:'p2',mob:(Net.guest&&Net.guest.mob)||'random',mob2:'random'}:{ctrl:'bot',mob:m,diff:C.ally,mob2:'random'}));
+  c.slots.B=S.e.map(([m,d,x])=>Object.assign({ctrl:'bot',mob:m,diff:d||C.diff},x&&x.mob2?{mob2:x.mob2}:{},x&&(x.hp||x.atk||x.name)?{boss:{hp:x.hp||1,atk:x.atk||0,name:x.name||null}}:{}));
+  c.counts={A:c.slots.A.length,B:c.slots.B.length};c.size=Math.max(c.counts.A,c.counts.B);
+  return c;
+}
+/* playing */
+function storyPlay(i){if(Net.on)netLeave();const c=storyCfg(i,false);audioInit();sfx('click');Game.paused=false;startMatch(c,false);show(null);banner('Stage '+STAGES[i].code+' '+STAGES[i].name);}
+function storyCoop(i){audioInit();sfx('click');netHost();Net.story=i;}
+function storyCoopStart(){if(Net.story==null||!Net.guest)return;const c=storyCfg(Net.story,true);Net.storyCfg=c;startMatch(c,false);show(null);banner('Stage '+STAGES[Net.story].code+' '+STAGES[Net.story].name);}
+/* result */
+function storyResult(team){
+  const i=Game.cfg.story,S=STAGES[i],C=CHAPTERS[S.ch],P=storyProf(),won=team==='A';
+  const me=Game.units.find(u=>u.ctrl==='p1');
+  const checks=[['win']].concat(S.goals).map(g=>{let ok=won;
+    if(won&&g[0]==='turns')ok=Game.turn<=g[1];
+    if(won&&g[0]==='hp')ok=!!me&&me.alive&&me.hp>=me.maxHp*g[1]/100;
+    if(won&&g[0]==='alive')ok=(Game.kos?Game.kos.A:0)===0;
+    if(won&&g[0]==='kos')ok=(Game.kos?Game.kos.A:0)<=g[1];
+    if(won&&g[0]==='jewels')ok=(Game.score?Game.score.A:0)>=g[1];
+    return{text:goalText(g,S),ok};});
+  const stars=checks.filter(c=>c.ok).length,before=P.stars[i]||0,first=won&&!P.clear[i],rewards=[];
+  if(stars>before)P.stars[i]=stars;
+  if(first){P.clear[i]=1;PROF.coins+=C.coins;rewards.push('First clear +'+C.coins+' coins');
+    if(S.boss){const it=storyGrantItem(C.itemRar);rewards.push(it?'Boss reward: '+it.name+' ('+RAR[it.rar].n+')':'Boss reward +'+(C.coins*2)+' coins');if(!it)PROF.coins+=C.coins*2;}}
+  for(const [need,kind] of [[5,'coins'],[10,'box'],[15,'item']]){const key=S.ch+':'+need;if(chapterStars(S.ch)>=need&&!P.chests[key]){P.chests[key]=1;rewards.push(storyChest(S.ch,kind,need));}}
+  saveProfile();refreshCoins();
+  return{i,won,stars,before,checks,rewards,next:won&&i+1<STAGES.length?i+1:null};
+}
+function storyGrantItem(rar){const pool=HATS.concat(CLOTHES,FACES,FLAGITEMS,TRAILS).filter(it=>it.rar===rar&&!PROF.own[it.id]);if(!pool.length)return null;const it=pick(pool);PROF.own[it.id]=1;return it;}
+function storyChest(ch,kind,need){
+  const C=CHAPTERS[ch];
+  if(kind==='coins'){PROF.coins+=150;return need+' star chest: +150 coins';}
+  if(kind==='box'){const B=BOXES.avatar,rar=rollRarity(),all=B.pool(),pool=all.filter(i=>i.rar===rar),it=pick(pool.length?pool:all);
+    if(PROF.own[it.id]){const r=Math.round(B.price*RAR[it.rar].ref);PROF.coins+=r;return need+' star chest: Avatar Box, '+it.name+' again, +'+r+' coins';}PROF.own[it.id]=1;return need+' star chest: Avatar Box, '+it.name+' ('+RAR[it.rar].n+')';}
+  const it=storyGrantItem(C.itemRar);if(it)return need+' star chest: '+it.name+' ('+RAR[it.rar].n+')';PROF.coins+=400;return need+' star chest: +400 coins';
+}
+const starRow=(n,max=3)=>'<span class="stars">'+[0,1,2].slice(0,max).map(k=>`<i class="${k<n?'on':''}">★</i>`).join('')+'</span>';
+function storyShowResult(r){
+  const el=$('#overstory');el.classList.remove('hide');
+  el.innerHTML=`<div class="osh">Stage ${STAGES[r.i].code} ${STAGES[r.i].name} ${starRow(r.stars)}</div><ul>${r.checks.map(c=>`<li class="${c.ok?'ok':''}">${c.ok?'★':'☆'} ${c.text}</li>`).join('')}</ul>${r.rewards.length?'<p class="orw">'+r.rewards.join('<br>')+'</p>':''}`;
+  const coop=Net.on&&Net.host&&Net.guest;let nx=r.next;
+  if(coop){nx=null;for(let j=r.i+1;j<STAGES.length;j++)if(STAGES[j].al.length&&stageOpen(j)){nx=j;break;}}
+  $('#nextstagebtn').classList.toggle('hide',nx==null||(Net.on&&!Net.host));$('#nextstagebtn').textContent=nx!=null&&nx!==r.i+1?'Next team stage':'Next stage';$('#storymapbtn').classList.remove('hide');
+  $('#nextstagebtn').onclick=()=>{sfx('click');if(coop&&Net.guest){Net.story=nx;storyCoopStart();}else storyPlay(nx);};
+  document.querySelectorAll('#over [data-go="setup"]').forEach(b=>b.classList.add('hide'));
+}
+function storyHideResult(){$('#overstory').classList.add('hide');$('#nextstagebtn').classList.add('hide');$('#storymapbtn').classList.add('hide');document.querySelectorAll('#over [data-go="setup"]').forEach(b=>b.classList.toggle('hide',Net.on&&!Net.host));}
+/* story screen */
+let STY={ch:0,sel:null};
+function openStory(){const P=storyProf();let last=0;for(let i=0;i<STAGES.length;i++)if(stageOpen(i))last=i;if(STY.sel==null){STY.sel=last;STY.ch=STAGES[last].ch;}renderStory();show('story');}
+function renderStory(){
+  const P=storyProf(),total=STAGES.reduce((n,s)=>n+stageStars(s.i),0);
+  $('#sytotal').innerHTML=`★ ${total} / ${STAGES.length*3}`;
+  $('#sychs').innerHTML=CHAPTERS.map((C,k)=>{const open=stageOpen(k*5);return`<button data-ch="${k}" class="${STY.ch===k?'on':''}" ${open?'':'disabled'}>${k+1}. ${C.name}<small>★ ${chapterStars(k)}/15</small></button>`;}).join('');
+  $('#sychs').querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{STY.ch=+b.dataset.ch;STY.sel=STY.ch*5;let k=STY.ch*5;for(let i=k;i<k+5;i++)if(stageOpen(i))STY.sel=i;sfx('click');renderStory();});
+  const C=CHAPTERS[STY.ch],cs=chapterStars(STY.ch);
+  $('#syintro').textContent=C.intro;
+  $('#sychest').innerHTML=[[5,'+150 coins'],[10,'Avatar Box'],[15,RAR[C.itemRar].n+' item']].map(([n,t])=>`<span class="${cs>=n?'got':''}">★${n} ${t}${cs>=n?' ✓':''}</span>`).join('');
+  $('#systages').innerHTML=STAGES.filter(s=>s.ch===STY.ch).map(s=>{const open=stageOpen(s.i),cl=!!P.clear[s.i];
+    return`<button class="sycard ${STY.sel===s.i?'sel':''} ${s.boss?'boss':''}" data-st="${s.i}" ${open?'':'disabled'}><span class="sycode">${s.code}${s.boss?' Boss':''}</span><b>${open?s.name:'Locked'}</b><span class="symeta">${GTNAME[s.gt]} · ${1+s.al.length}v${s.e.length}</span>${starRow(stageStars(s.i))}${open&&!cl?'<span class="synew">First clear reward</span>':''}</button>`;}).join('');
+  $('#systages').querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{STY.sel=+b.dataset.st;sfx('click');renderStory();});
+  renderStageInfo();
+}
+function renderStageInfo(){
+  const i=STY.sel,S=STAGES[i],C=CHAPTERS[S.ch],P=storyProf(),cfg=storyCfg(i,false);
+  const mapName=MAPS[S.map]?MAPS[S.map].name:'Random';
+  const foe=s=>`<div class="syfoe"><canvas width="132" height="104" data-mk="${s.mob}"></canvas><span>${s.boss&&s.boss.name?s.boss.name:MOBS[s.mob].name}</span><small>${DIFF[s.diff].label}${s.boss&&s.boss.hp>1?', '+Math.round(s.boss.hp*100)+'% HP':''}</small></div>`;
+  $('#syinfo').innerHTML=`<div class="syhead"><h3>${S.code} ${S.name}</h3>${starRow(stageStars(i))}</div><p class="sydesc">${S.desc}</p>
+    <div class="onsum"><span>Game <b>${GTNAME[S.gt]}</b></span><span>Teams <b>${cfg.counts.A}v${cfg.counts.B}</b></span><span>Map <b>${mapName}</b></span><span>Wind <b>${{calm:'Calm',normal:'Normal',wild:'Wild'}[S.wind]}</b></span><span>Weather <b>${S.weather==='on'?'On':'Off'}</b></span></div>
+    <div class="syrow"><div><h4>Enemies</h4><div class="syfoes">${cfg.slots.B.map(foe).join('')}</div></div>
+    <div><h4>Your team</h4><div class="syfoes"><button class="syfoe me" id="symob" title="Pick your mobile"><canvas width="132" height="104"></canvas><span>You</span><small>${P.mob==='random'||!P.mob?'Random':MOBS[P.mob].name}</small></button>${cfg.slots.A.slice(1).map(s=>`<div class="syfoe"><canvas width="132" height="104" data-mk="${s.mob}" data-team="A"></canvas><span>Ally</span><small>${MOBS[s.mob].name}</small></div>`).join('')}</div></div></div>
+    <h4>Stars</h4><ul class="sygoals">${[['win']].concat(S.goals).map((g,k)=>`<li class="${k<stageStars(i)?'ok':''}">${k<stageStars(i)?'★':'☆'} ${goalText(g,S)}</li>`).join('')}</ul>
+    <p class="note">${P.clear[i]?'Cleared. Replays still give normal match coins.':'First clear reward: '+C.coins+' coins'+(S.boss?' and a '+RAR[C.itemRar].n+' item':'')}</p>
+    <div class="row-btns">${S.al.length?'<button class="btn ghost" id="sycoop">'+(Net.on&&Net.host&&Net.guest?'Play with '+((Net.guest.card&&Net.guest.card.name)||'your friend'):'Play with a friend')+'</button>':''}<button class="btn" id="syplay">${Net.on&&Net.host&&Net.guest&&S.al.length?'Play with a bot ally':'Play'}</button></div>`;
+  $('#syinfo').querySelectorAll('canvas[data-mk]').forEach(cv=>drawPortrait(cv,cv.dataset.mk,cv.dataset.team||'B'));
+  drawPortrait($('#symob canvas'),P.mob&&P.mob!=='random'?P.mob:null,'A',null,profAvatar());
+  $('#symob').onclick=()=>{const s={mob:P.mob||'random'};Net.storyPick=s;openMobPicker(s,'A');};
+  $('#syplay').onclick=()=>{if(Net.on)netLeave();storyPlay(i);};const cb=$('#sycoop');if(cb)cb.onclick=()=>{if(Net.on&&Net.host&&Net.guest){Net.story=i;storyCoopStart();}else storyCoop(i);};
+}
+/* co-op room for a story stage */
+function netStoryWait(){
+  const S=STAGES[Net.story];
+  $('#onbody').innerHTML=`<p class="onlead">Story stage ${S.code} ${S.name}. Send this room code to your friend. They join your team and pick their own mobile.</p><div class="oncode">${Net.code}</div>
+    <p class="onmsg" id="onmsg">${Net.guest?((Net.guest.card&&Net.guest.card.name)||'Player 2')+' joined'+(Net.guest.mob&&Net.guest.mob!=='random'?' with '+MOBS[Net.guest.mob].name:''):'Waiting for your friend…'}</p>
+    <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="systart" ${Net.guest?'':'disabled'}>Start stage</button></div>`;
+  const b=$('#systart');if(b)b.onclick=()=>{sfx('click');storyCoopStart();};
+  show('online');
 }
 
 /* ---------- game types: score, tag, jewel ---------- */
@@ -2068,11 +2256,11 @@ function startMatch(cfg,demo=false){
   const style=cfg.map==='random'?pick(MAPKEYS.filter(k=>k!=='random')):(MAPS[cfg.map]?cfg.map:'hills'),MP=MAPS[style];
   T.theme=MP.theme?THEMES.find(t=>t.name===MP.theme)||pick(THEMES):pick(THEMES);
   genMap(style,w);
-  Object.assign(Game,{callouts:[],units:[],projs:[],parts:[],texts:[],fx:[],crates:[],tornados:[],fires:[],sd:false,windBase:null,windLeft:0,turn:0,shake:0,flash:0,focus:null,paused:false});
+  Object.assign(Game,{kos:{A:0,B:0},callouts:[],units:[],projs:[],parts:[],texts:[],fx:[],crates:[],tornados:[],fires:[],sd:false,windBase:null,windLeft:0,turn:0,shake:0,flash:0,focus:null,paused:false});
   const names=shuffle(BOTNAMES.slice());let id=0;
   const humanCount={p1:0,p2:0},humanSeen={p1:0,p2:0};
-  for(const tm of ['A','B'])for(let i=0;i<n;i++){const s=cfg.slots[tm][i];if(s&&s.ctrl!=='bot')humanCount[s.ctrl]++;}
-  for(const tm of ['A','B'])for(let i=0;i<n;i++){
+  for(const tm of ['A','B'])for(let i=0;i<(cfg.counts?cfg.counts[tm]:n);i++){const s=cfg.slots[tm][i];if(s&&s.ctrl!=='bot')humanCount[s.ctrl]++;}
+  for(const tm of ['A','B'])for(let i=0;i<(cfg.counts?cfg.counts[tm]:n);i++){
     const s=cfg.slots[tm][i]||{ctrl:'bot',mob:'random',diff:'normal'};
     const mk=s.mob==='random'?pick(MOBKEYS):s.mob,mob=MOBS[mk];
     let name;
@@ -2086,6 +2274,7 @@ function startMatch(cfg,demo=false){
     applyGear(nu,s.ctrl==='p1'?profAvatar():s.ctrl==='p2'?(cfg.p2card||randomAvatar(null)):botAvatar(nu.diff));
     if(cfg.gt==='tag'){const m2=s.mob2&&s.mob2!=='random'?s.mob2:pick(MOBKEYS.filter(k=>k!==mk));makeTag(nu,m2);}
     nu.rank=s.ctrl==='p1'?rankOf(PROF.rp||0):s.ctrl==='p2'?((cfg.p2card&&cfg.p2card.rank)||0):botRank(nu.diff);
+    if(s.boss){nu.maxHp=Math.round(nu.maxHp*(s.boss.hp||1));nu.hp=nu.maxHp;nu.atk=(nu.atk||0)+(s.boss.atk||0);if(s.boss.name)nu.name=s.boss.name;nu.boss=true;nu.rank=Math.max(nu.rank,RANKS.length-3);}
   }
   Game.gmul=MP.gmul||1;Game.windMul=MP.windMul||1;Game.mapName=MP.name;
   placeUnits(cfg.spawn||'random');
@@ -3846,7 +4035,7 @@ let bannerT=0;
 function banner(txt){const b=$('#banner');b.textContent=txt;b.classList.add('show');clearTimeout(bannerT);bannerT=setTimeout(()=>b.classList.remove('show'),1300);}
 
 /* ---------- screens ---------- */
-const SCREENS=['title','how','setup','pause','over','locker','online'];
+const SCREENS=['title','how','setup','pause','over','locker','online','story'];
 let lastScreen='title';
 function show(id){
   if(id==='title'&&typeof refreshCoins==='function')try{refreshCoins();}catch(e){}
@@ -3866,6 +4055,7 @@ document.addEventListener('click',e=>{
   else if(v==='how'){show('how');}
   else if(v==='locker'){openLocker();}
   else if(v==='online'){openOnline();}
+  else if(v==='story'){openStory();}
   else if(v==='back'){show(lastScreen==='how'?'title':lastScreen);}
 });
 
@@ -3965,6 +4155,17 @@ endMatch=function(team){
 };}
 {const _sh=show;show=function(id){_sh(id);const g=Net.on&&!Net.host;$('#pauselog').classList.toggle('hide',!Net.on&&!NLOG.length);$('#pauselog').onclick=()=>netCopyLog();document.querySelectorAll('#over [data-go="setup"],#rematchbtn,#restartbtn,#pause [data-go="setup"]').forEach(b=>b.classList.toggle('hide',g));};}
 {const _sb=$('#startbtn').onclick;$('#startbtn').onclick=e=>{if(Net.on&&Net.host&&!Net.guest){const c=$('#roomchip');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');return;}_sb(e);};}
+
+/* story hooks */
+{const _em=endMatch;endMatch=function(team){
+  const st=Game.cfg&&Game.cfg.story!=null&&!Game.demo&&!(Net.on&&!Net.host)&&Game.state!=='over';
+  let r=null;if(st)try{r=storyResult(team);}catch(e){console.error(e);}
+  _em(team);if(r)storyShowResult(r);else storyHideResult();};}
+{const _ku=killUnit;killUnit=function(u,o,f){const was=u.alive,mk=u.mk;_ku(u,o,f);if(Game.kos&&was&&(!u.alive||u.mk!==mk))Game.kos[u.team]++;};}
+{const _bs2=buildSetup;buildSetup=function(){if(Net.storyPick){storyProf().mob=Net.storyPick.mob;Net.storyPick=null;saveProfile();renderStory();return;}_bs2();};}
+{const _sh2=show;show=function(id){_sh2(id);if(id==='over'&&Game.cfg&&Game.cfg.story!=null)document.querySelectorAll('#over [data-go="setup"],#pause [data-go="setup"]').forEach(b=>b.classList.add('hide'));
+  if(id==='pause')$('#pause [data-go="setup"]').classList.toggle('hide',!!(Game.cfg&&Game.cfg.story!=null)||(Net.on&&!Net.host));};}
+$('#storymapbtn').onclick=()=>{sfx('click');startMatch(demoCfg(),true);openStory();};
 
 /* ---------- locker ---------- */
 ICONS.coin=SV(`<circle cx="16" cy="16" r="12" fill="#ffc83d" ${K}/><circle cx="16" cy="16" r="7.5" fill="none" stroke="#c8901a" stroke-width="2"/><path d="M16 11.5V20.5" stroke="#c8901a" stroke-width="2.4" stroke-linecap="round"/>`);
