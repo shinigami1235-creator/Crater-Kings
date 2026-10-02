@@ -341,7 +341,7 @@ canvas.badge{vertical-align:middle}#lkstats .rk{display:flex;align-items:center;
       <p>Online lets you play someone on another device. One of you taps Host a room and sends the 5-letter code, and the other types it in under Online. The host picks the map and the game, each of you keeps the coins and rank you earn, and if the other player leaves, a bot takes over their mobile.</p>
       <p>Pick a map in the room. Random hills, islands and sky isles are new every match. The named maps stay the same so you can learn them, and some have their own rules: Sky Steps has lighter gravity and Twin Spires has stronger wind.</p>
       <p>Pick the game in the match setup. Solo is the normal match. In Score each team shares a pool of lives, two per player, and a knocked-out mobile parachutes back in while lives remain. In Tag every player brings two mobiles and swaps with the Tag button or T, which adds 200 delay, and the second one jumps in when the first is knocked out. Jewel turns damage off: shoot the floating jewels to score, blue ones are worth 1 and gold ones 3, and the team with more points wins when they run out.</p>
-      <p>The weather row under the ruler shows what is coming next. Tornados spin shots, a Mirror flips any shot that crosses it, a Black Hole pulls shots in and swallows them, Thunder strikes three random spots, Force adds 40% damage for that turn. Thor parks a big satellite in the sky for five turns that fires a laser from where it sits to the spot each shot lands. It levels up the more damage it deals, up to level 5, and keeps its level for the rest of the match.</p>
+      <p>The weather row under the ruler shows what is coming next. Tornados spin shots, a Mirror flips any shot that crosses it, a Black Hole pulls shots in and swallows them, Thunder strikes three random spots, Force adds 40% damage for that turn. Thor parks a big satellite in the sky above the middle of the map for five turns. It always comes back to that same spot, and it fires a laser from there at the spot each shot lands. It levels up the more damage it deals, up to level 5, and keeps its level for the rest of the match.</p>
       <p>Sudden death starts at the turn set in the match setup. From then on every mobile's special is ready every turn.</p>
       <p>Steer your parachute with the arrow keys at the start of a match. In a 2 player match Player 2 steers with A and D.</p>
       <p>Crates drop from the sky during a match. Drive into one to pick it up before a blast destroys it.</p>
@@ -1450,7 +1450,8 @@ function topY(){const t=$('#topbar');if(!t||$('#hud').classList.contains('hide')
 /* off-screen satellites show as small icons on the ruler line */
 function drawSatMarks(c){
   if(!Game.mirrors||Game.demo||Game.state==='over')return;
-  const y=topY()+8,list=[];if(Game.thor)list.push([Game.thor,2.1,satLv(Game.thorDmg),'#ffd23d']);
+  const y=topY()+8,list=[];
+  if(Game.thor){const t=Game.thor,sx=(t.x-cam.x)*S,sy=(t.y+thorR()*1.6-cam.y)*S;if(sy<=y+20&&sx>-20&&sx<SW+20){c.save();c.setTransform(DPR,0,0,DPR,0,0);drawThor(c,sx,y+2,9,satLv(Game.thorDmg),t.da==null?PI/2:t.da,t.fire||0,null);c.restore();}}
   for(const u of Game.units)if(u.alive&&u.sat)list.push([u.sat,.95,satLv(u.sat.dmg),TEAMCOL[u.team]]);
   for(const [s,sc,lv,col] of list){const sx=(s.x-cam.x)*S,sy=(s.y+30*sc-cam.y)*S;if(sy>y+20||sx<-20||sx>SW+20)continue;
     c.save();c.setTransform(DPR,0,0,DPR,0,0);drawSat(c,sx,y,sc>1.5?.55:.42,lv,col,s.fire||0,null);c.restore();}
@@ -1475,8 +1476,9 @@ function satFire(s,x,y,owner,o){
   const seg={x0:x-ux*reach,y0:y-uy*reach,x1:x+ux*ext,y1:y+uy*ext};let dealt=0;
   for(const v of Game.units)if(v.alive&&segDist(v.x,v.y-14,seg)<o.w+UR*.5){const t=damage(v,o.dmg,owner);if(t&&owner&&v.team!==owner.team)dealt+=t;}
   for(let d=-(o.carve||30);d<ext;d+=6)carve(x+ux*d,y+uy*d,o.w*.75,false);
-  Game.fx.push({type:'beam',x0:s.x,y0:s.y+12,x1:seg.x1,y1:seg.y1,w:o.w,life:46,max:46,col:'zap'});
-  for(let k=0;k<12;k++)addP({x:s.x+R(-8,8),y:s.y+12,vx:R(-1,1),vy:R(0,1.5),t:'glow',rgb:'160,240,255',s:R(3,6),gs:-.15,life:R(14,24),add:true});
+  let ox=s.x,oy=s.y+12;if(s===Game.thor){const a=Math.atan2(y-s.y,x-s.x),r=thorR()*1.5;s.aim=a;s.da=a;ox=s.x+Math.cos(a)*r;oy=s.y+Math.sin(a)*r;}
+  Game.fx.push({type:'beam',x0:ox,y0:oy,x1:seg.x1,y1:seg.y1,w:o.w,life:46,max:46,col:'zap'});
+  for(let k=0;k<12;k++)addP({x:ox+R(-8,8),y:oy,vx:R(-1,1),vy:R(0,1.5),t:'glow',rgb:'160,240,255',s:R(3,6),gs:-.15,life:R(14,24),add:true});
   blastFx(x,y,o.w+8,'zap');s.fire=24;
   sfx('beam');Game.shake=Math.max(Game.shake,o.w>20?18:10);Game.flash=Math.max(Game.flash,o.w>20?.35:.2);
   return dealt;
@@ -1506,8 +1508,49 @@ function drawSat(c,x,y,sc,lv,col,fire,label){
   if(label){c.save();c.font='900 13px "Trebuchet MS",sans-serif';c.textAlign='center';c.lineWidth=4;c.strokeStyle=OL;c.strokeText(label,x,y+44*sc);c.fillStyle='#fff';c.fillText(label,x,y+44*sc);c.restore();}
   if(fire>0)fire--;
 }
+
+/* Thor: big satellite parked above the middle of the map */
+const thorR=()=>44+3*(satLv(Game.thorDmg)-1);
+function drawThor(c,x,y,R,lv,aim,fire,label){
+  c.save();c.translate(x,y);c.lineJoin='round';c.lineCap='round';
+  if(fire>0)glow(c,Math.cos(aim)*R*1.5,Math.sin(aim)*R*1.5,R*1.1,'150,240,255',fire/24);c.globalAlpha=1;
+  c.rotate(aim);
+  // engine streaks on the back
+  c.save();c.rotate(PI);
+  for(let i=0;i<6;i++){const o=(i-2.5)*R*.27,l=R*(.6+.55*(((i*7+Math.floor(Game.t/5))%5)/5));c.strokeStyle=`rgba(225,232,255,${.75-.1*Math.abs(i-2.5)})`;c.lineWidth=R*.075;c.beginPath();c.moveTo(R*1.02,o*.9);c.lineTo(R*1.02+l,o*1.3);c.stroke();}
+  c.restore();
+  // top and bottom brackets on rods
+  for(const sg of[-1,1]){
+    c.strokeStyle=OL;c.lineWidth=R*.2;c.beginPath();c.moveTo(0,sg*R*.95);c.lineTo(0,sg*R*1.42);c.stroke();
+    c.strokeStyle='#5a63e0';c.lineWidth=R*.1;c.stroke();
+    const a0=sg<0?-PI*.74:PI*.26,a1=sg<0?-PI*.26:PI*.74;
+    c.strokeStyle=OL;c.lineWidth=R*.26;c.beginPath();c.arc(0,0,R*1.5,a0,a1);c.stroke();
+    c.strokeStyle='#5a63e0';c.lineWidth=R*.16;c.stroke();c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=R*.04;c.beginPath();c.arc(0,0,R*1.45,a0+.06,a1-.06);c.stroke();
+    for(const a of[a0+.13,a1-.13]){c.strokeStyle='#ffd23d';c.lineWidth=R*.1;c.beginPath();c.arc(0,0,R*1.5,a-.05,a+.05);c.stroke();}
+  }
+  // cannon, turned toward the last spot it fired at
+  c.save();
+  for(const sg of[-1,1]){c.beginPath();c.moveTo(R*.85,sg*R*.25);c.quadraticCurveTo(R*1.25,sg*R*.75,R*1.5,sg*R*.85);c.lineTo(R*1.18,sg*R*.32);c.closePath();fo(c,'#dfe6f4',R*.05);}
+  rr(c,R*.7,-R*.22,R*.55,R*.44,R*.08);fo(c,lg(c,0,-R*.22,0,R*.22,'#9aa2ff','#4a52c8','#2a2e8a'),R*.05);
+  c.beginPath();c.moveTo(R*1.2,-R*.2);c.lineTo(R*1.5,-R*.13);c.lineTo(R*1.5,R*.13);c.lineTo(R*1.2,R*.2);c.closePath();fo(c,lg(c,0,-R*.2,0,R*.2,'#ffffff','#c8d0e0','#8a93a6'),R*.05);
+  c.restore();
+  // body: blue ring, red window with spokes, glowing core
+  c.beginPath();c.arc(0,0,R,0,TAU);fo(c,lg(c,0,-R,0,R,'#8a94ff','#4a52d8','#2a2e8a'),R*.07);
+  c.beginPath();c.arc(0,0,R*.74,0,TAU);fo(c,lg(c,0,-R*.74,0,R*.74,'#ff8a7a','#e0392a','#8a1a14'),R*.05);
+  c.strokeStyle='#5a63e0';c.lineWidth=R*.1;for(let i=0;i<6;i++){const a=i*TAU/6+PI/6;c.beginPath();c.moveTo(Math.cos(a)*R*.2,Math.sin(a)*R*.2);c.lineTo(Math.cos(a)*R*.72,Math.sin(a)*R*.72);c.stroke();}
+  c.strokeStyle=OL;c.lineWidth=R*.03;for(let i=0;i<6;i++){const a=i*TAU/6+PI/6;c.beginPath();c.moveTo(Math.cos(a)*R*.24,Math.sin(a)*R*.24);c.lineTo(Math.cos(a)*R*.72,Math.sin(a)*R*.72);c.stroke();}
+  c.beginPath();c.arc(0,0,R*.74,0,TAU);c.strokeStyle='rgba(255,255,255,.25)';c.lineWidth=R*.04;c.stroke();
+  for(let i=0;i<8;i++){const a=i*TAU/8+PI/8;c.save();c.rotate(a);c.fillStyle=i%2?'#ffd23d':'#3a40a8';c.fillRect(R*.8,-R*.05,R*.14,R*.1);c.restore();}
+  const og=c.createRadialGradient(-R*.07,-R*.08,R*.02,0,0,R*.26);og.addColorStop(0,'#ffe0ff');og.addColorStop(.4,'#e05ad8');og.addColorStop(1,'#7a1a8a');
+  c.beginPath();c.arc(0,0,R*.25,0,TAU);c.fillStyle=og;c.fill();c.strokeStyle=OL;c.lineWidth=R*.05;c.stroke();
+  c.beginPath();c.arc(0,0,R*.3,0,TAU);c.strokeStyle='#5a63e0';c.lineWidth=R*.06;c.stroke();
+  c.fillStyle='rgba(255,255,255,.85)';E(c,-R*.08,-R*.09,R*.06,R*.05);c.fill();
+  c.restore();
+  if(label){const ly=y+R*1.9;for(let i=0;i<5;i++){c.beginPath();c.arc(x-24+i*12,ly,4,0,TAU);fo(c,i<lv?'#ffd23d':'rgba(20,20,30,.5)',1.4);}
+    c.save();c.font='900 15px "Trebuchet MS",sans-serif';c.textAlign='center';c.lineWidth=4;c.strokeStyle=OL;c.strokeText(label,x,ly+22);c.fillStyle='#fff';c.fillText(label,x,ly+22);c.restore();}
+}
 function drawSats(c){
-  if(Game.thor){const t=Game.thor;t.fire=Math.max(0,(t.fire||0)-1);drawSat(c,t.x,t.y+Math.sin(Game.t*.03)*4,2.1+.12*(satLv(Game.thorDmg)-1),satLv(Game.thorDmg),'#ffd23d',t.fire,'Thor Lv '+satLv(Game.thorDmg));}
+  if(Game.thor){const t=Game.thor;t.fire=Math.max(0,(t.fire||0)-1);t.da=t.da==null?(t.aim||PI/2):t.da+Math.atan2(Math.sin((t.aim||PI/2)-t.da),Math.cos((t.aim||PI/2)-t.da))*.15;drawThor(c,t.x,t.y+Math.sin(Game.t*.03)*5,thorR(),satLv(Game.thorDmg),t.da,t.fire,'Thor Lv '+satLv(Game.thorDmg));}
   for(const u of Game.units){if(!u.alive||(u.mk!=='beacon'&&!u.sat))continue;const s=ensureSat(u);s.fire=Math.max(0,(s.fire||0)-1);drawSat(c,s.x,s.y+Math.sin(Game.t*.04+Game.units.indexOf(u))*3,.95,satLv(s.dmg),TEAMCOL[u.team],s.fire,null);}
 }
 
@@ -1536,7 +1579,7 @@ function advanceWeather(){
   else if(w==='hole'){Game.holes.push({x:R(.2,.8)*T.W,y:R(160,360),life:2,r:300});}
   else if(w==='thunder'){for(let i=0;i<3;i++){const x=R(80,T.W-80),y=surfaceY(x)||T.H;setTimeout(()=>{if(Game.on&&!Game.paused&&Game.state!=='over'){doStrike(x,y,{w:12,dmg:70,fx:'bolt'},null,1);if(Net.on&&Net.host)netSend({t:'strike',x,y});}},400+i*350);}}
   else if(w==='force'){Game.force=true;}
-  else if(w==='thor'){if(Game.thor)Game.thor.life=5;else Game.thor={life:5,x:R(.25,.75)*T.W,y:skyY()-50,fire:0};}
+  else if(w==='thor'){if(Game.thor)Game.thor.life=5;else Game.thor={life:5,x:T.W/2,y:skyY()-40,fire:0,aim:PI/2};}
   if(w!=='clear')toast(WEATHER[w].n,w==='force'?'#ff8a7a':w==='thunder'?'#ffe27a':'#9fe8ff');
   hud.dirtyWeather=true;
 }
